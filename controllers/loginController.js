@@ -7,6 +7,7 @@ const generateAccessToken = require('../generateAccessToken');
 const register = async (req, res) => {
   try{
     const body = req.body;
+    console.log(req.body)
     const emailFromDb = await loginModel.findOne({
       gmail: body.gmail,
     });
@@ -15,22 +16,28 @@ const register = async (req, res) => {
         status: 'Already Exist',
       });
     }
-    await cloudinary.uploader
-      .upload(req.file.path, (result) => {
-        // This will return the output after the code is exercuted both in the terminal and web browser
-        // When successful, the output will consist of the metadata of the uploaded file one after the other. These include the name, type, size and many more.
-        console.log(result);
-      })
-      .then(async (result) => {
+    try{
+    const url  =   await cloudinary.uploader
+      .upload(req?.file?.path)
+
+      // .then(async (result) => {
+
+      if(url){
         const user = new loginModel(body);
-        user.image = result.secure_url;
+        user.image = url.secure_url||"no";
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
         await user.save();
         res.json({
           status: 201,
         });
-      });
+      }
+       
+      // });
+    }catch(err){
+      res.json(err.message)
+    }
+  
   
   }catch(err){
     res.send(err?.message)

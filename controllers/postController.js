@@ -14,13 +14,19 @@ const getAllPosts = async (req, res) => {
 };
 
 const getPostById = async (req, res) => {
-  const withoutQuotesEmail = req.params.email.replaceAll('"', '');
-  const postByID = await postModel
-    .find({ email: withoutQuotesEmail })
-    .populate('user');
-  res.json({
-    postByID,
-  });
+  try{
+    const withoutQuotesEmail = req?.params?.email?.replaceAll('"', '');
+    const postByID = await postModel
+      .find({ email: withoutQuotesEmail })
+      .populate('user');
+    res.json({
+      postByID,
+    });
+  }
+  catch(err){
+  res.json(err.message)
+  }
+ 
 };
 const addPost = async (req, res) => {
   try{

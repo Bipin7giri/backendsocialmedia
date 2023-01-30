@@ -39,14 +39,20 @@ const register = async (req, res) => {
   // res.send('success');
 };
 const getAllUsers = async (req, res) => {
-  const authEmail = req.params.email;
+  try{
+    const authEmail = req.params.email;
 
-  const getAuthUser = await loginModel
-    .find({
-      gmail: authEmail.replaceAll('"', ''),
-    })
-    .populate('posts');
-  res.send(getAuthUser);
+    const getAuthUser = await loginModel
+      .find({
+        gmail: authEmail.replaceAll('"', ''),
+      })
+      .populate('posts');
+    res.send(getAuthUser);
+  }
+  catch(err){
+   res.send(err.message)
+  }
+ 
   // console.log(getAuthUser);
   // return;
   // if (req.params.email) {
@@ -66,32 +72,38 @@ const getAllUsers = async (req, res) => {
   // }
 };
 const isLogin = async (req, res) => {
-  const token = generateAccessToken({ username: req.body.gmail });
-  const userEmail = await req.body.gmail;
-  const userPassword = await req.body.password;
-  const emailDb = await loginModel.findOne({
-    gmail: userEmail,
-  });
-
-  if (emailDb) {
-    bcrypt.compare(userPassword, emailDb.password, function (err, status) {
-      if (status === true) {
-        res.json({
-          status: 'matched',
-          token: token,
-        });
-        // res.send('matched');
-      } else {
-        res.json({
-          status: 'not matched',
-        });
-      }
+  try{
+    const token = generateAccessToken({ username: req.body.gmail });
+    const userEmail = await req.body.gmail;
+    const userPassword = await req.body.password;
+    const emailDb = await loginModel.findOne({
+      gmail: userEmail,
     });
-  } else {
-    res.json({
-      status: 'not registered',
-    });
+  
+    if (emailDb) {
+      bcrypt.compare(userPassword, emailDb.password, function (err, status) {
+        if (status === true) {
+          res.json({
+            status: 'matched',
+            token: token,
+          });
+          // res.send('matched');
+        } else {
+          res.json({
+            status: 'not matched',
+          });
+        }
+      });
+    } else {
+      res.json({
+        status: 'not registered',
+      });
+    }
   }
+  catch(err){
+    res.send(err.message)
+  }
+  
 };
 // adding follower
 const addFollower = async (req, res) => {

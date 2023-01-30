@@ -113,43 +113,60 @@ const isLogin = async (req, res) => {
 };
 // adding follower
 const addFollower = async (req, res) => {
-  const withoutQuotesEmail = req.body.authEmail.replaceAll('"', '');
-
-  const followed = await loginModel.updateOne(
-    { gmail: withoutQuotesEmail },
-    { $push: { Following: req.body.followID } }
-  );
-  const follower = await loginModel.updateOne(
-    { gmail: req.body.followID },
-    { $push: { Followers: withoutQuotesEmail } }
-  );
-  if (followed && follower) {
-    res.send('followed');
+  try{
+    const withoutQuotesEmail = req?.body?.authEmail?.replaceAll('"', '');
+    const followed = await loginModel.updateOne(
+      { gmail: withoutQuotesEmail },
+      { $push: { Following: req.body.followID } }
+    );
+    const follower = await loginModel.updateOne(
+      { gmail: req.body.followID },
+      { $push: { Followers: withoutQuotesEmail } }
+    );
+    if (followed && follower) {
+      res.send('followed');
+    }
   }
+  catch(err){
+res.json(err)
+  }
+  
 };
 const getFollowing = async (req, res) => {
-  const withoutQuotesEmail = req.params.email.replaceAll('"', '');
-  // console.log(withoutQuotesEmail);
-
-  const allUsers = await loginModel.find({
-    gmail: { $ne: withoutQuotesEmail },
-  });
-
-  if (allUsers) {
-    res.send(allUsers);
+  try{
+    const withoutQuotesEmail = req?.params?.email?.replaceAll('"', '');
+    // console.log(withoutQuotesEmail);
+  
+    const allUsers = await loginModel.find({
+      gmail: { $ne: withoutQuotesEmail },
+    });
+  
+    if (allUsers) {
+      res.send(allUsers);
+    }
   }
+  catch(err){
+res.json(err)
+  }
+ 
 };
 const showIfNotFollowed = async (req, res) => {
-  const withoutQuotesEmail = req.params.email.replaceAll('"', '');
+  try{
+    const withoutQuotesEmail = req?.params?.email?.replaceAll('"', '');
 
-  const { Following } = await loginModel.findOne({
-    gmail: withoutQuotesEmail,
-  });
-  if ({ Following }) {
-    res.json({
-      following: Following,
+    const { Following } = await loginModel.findOne({
+      gmail: withoutQuotesEmail,
     });
+    if ({ Following }) {
+      res.json({
+        following: Following,
+      });
+    }
   }
+  catch(err){
+     res.json(err)
+  }
+
 };
 
 // module.exports = { register };

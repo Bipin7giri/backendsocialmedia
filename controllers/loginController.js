@@ -17,11 +17,10 @@ const register = async (req, res) => {
       });
     }
     try{
+
     const url  =   await cloudinary.uploader
       .upload(req?.file?.path)
-
       // .then(async (result) => {
-
       if(url){
         const user = new loginModel(body);
         user.image = url.secure_url||"no";

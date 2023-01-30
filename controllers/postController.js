@@ -15,7 +15,7 @@ const getAllPosts = async (req, res) => {
 
 const getPostById = async (req, res) => {
   try{
-    const withoutQuotesEmail = req?.params?.email?.replaceAll('"', '');
+    const withoutQuotesEmail = req?.params?.email
     const postByID = await postModel
       .find({ email: withoutQuotesEmail })
       .populate('user');
@@ -89,7 +89,7 @@ const addPost = async (req, res) => {
 // add Comment to post
 const addComment = async (req, res) => {
   try{
-    const withoutQuotesEmail = req.body.email.replaceAll('"', '');
+    const withoutQuotesEmail = req.body.emai
     const data = await postModel.findByIdAndUpdate(
       {
         _id: req.body.id,
@@ -125,7 +125,7 @@ const addComment = async (req, res) => {
 
 const addLike = async (req, res) => {
   try{
-    const withoutQuotesEmail = req.body.email?.replaceAll('"', '');
+    const withoutQuotesEmail = req.body.email
     const { likes, _id } = await postModel.findById({ _id: req.body.id });
     const check = likes.filter((item) => {
       if (item.email === withoutQuotesEmail) {

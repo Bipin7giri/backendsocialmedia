@@ -23,54 +23,61 @@ const getPostById = async (req, res) => {
   });
 };
 const addPost = async (req, res) => {
-  const withoutQuotesEmail = req.body?.email?.replaceAll('"', '');
-  const userId = await UserModel.find({ gmail: withoutQuotesEmail });
-  const user_id = await UserModel.findOne({ gmail: withoutQuotesEmail });
-  if (req.file) {
-    await cloudinary.uploader
-      .upload(req.file.path, (result) => {
-        // This will return the output after the code is exercuted both in the terminal and web browser
-        // When successful, the output will consist of the metadata of the uploaded file one after the other. These include the name, type, size and many more.
-        console.log(result);
-      })
-      .then(async (result) => {
-        const newPost = await postModel.create({
-          email: withoutQuotesEmail,
-          title: req.body.title,
-          content: req.body.content,
-          tags: req.body.tags,
-          image: result.secure_url,
-          user: user_id,
+  try{
+    const withoutQuotesEmail = req.body?.email?.replaceAll('"', '');
+    const userId = await UserModel.find({ gmail: withoutQuotesEmail });
+    const user_id = await UserModel.findOne({ gmail: withoutQuotesEmail });
+    if (req.file) {
+      await cloudinary.uploader
+        .upload(req.file.path, (result) => {
+          // This will return the output after the code is exercuted both in the terminal and web browser
+          // When successful, the output will consist of the metadata of the uploaded file one after the other. These include the name, type, size and many more.
+          console.log(result);
+        })
+        .then(async (result) => {
+          const newPost = await postModel.create({
+            email: withoutQuotesEmail,
+            title: req.body.title,
+            content: req.body.content,
+            tags: req.body.tags,
+            image: result.secure_url,
+            user: user_id,
+          });
+          const users = await UserModel.findOneAndUpdate(
+            {
+              gmail: withoutQuotesEmail,
+            },
+            {
+              $push: { posts: newPost },
+            }
+          );
+          res.send('added to db');
         });
-        const users = await UserModel.findOneAndUpdate(
-          {
-            gmail: withoutQuotesEmail,
-          },
-          {
-            $push: { posts: newPost },
-          }
-        );
-        res.send('added to db');
+    } else {
+      const newPost = await postModel.create({
+        email: withoutQuotesEmail,
+        title: req.body.title,
+        content: req.body.content,
+        tags: req.body.tags,
+        image: '',
+        user: user_id,
       });
-  } else {
-    const newPost = await postModel.create({
-      email: withoutQuotesEmail,
-      title: req.body.title,
-      content: req.body.content,
-      tags: req.body.tags,
-      image: '',
-      user: user_id,
-    });
-    const users = await UserModel.findOneAndUpdate(
-      {
-        gmail: withoutQuotesEmail,
-      },
-      {
-        $push: { posts: newPost },
-      }
-    );
-    res.send('added to db');
+      const users = await UserModel.findOneAndUpdate(
+        {
+          gmail: withoutQuotesEmail,
+        },
+        {
+          $push: { posts: newPost },
+        }
+      );
+      res.send('added to db');
+    }
   }
+  catch(err){
+    console.log(err)
+   res.json(err.message)
+  }
+ 
 };
 
 // add Comment to post

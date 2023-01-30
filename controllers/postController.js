@@ -30,7 +30,7 @@ const getPostById = async (req, res) => {
 };
 const addPost = async (req, res) => {
   try{
-    const withoutQuotesEmail = req.body?.email?.replaceAll('"', '');
+    const withoutQuotesEmail = req.body.email;
     const userId = await UserModel.find({ gmail: withoutQuotesEmail });
     const user_id = await UserModel.findOne({ gmail: withoutQuotesEmail });
     if (req.file) {

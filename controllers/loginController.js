@@ -50,19 +50,20 @@ const getAllUsers = async (req, res) => {
 
     const getAuthUser = await loginModel
       .find({
-        gmail: authEmail.replaceAll('"', ''),
+        gmail: authEmail,
       })
       .populate('posts');
     res.send(getAuthUser);
   }
   catch(err){
+    console.log(err)
    res.send(err.message)
   }
  
   // console.log(getAuthUser);
   // return;
   // if (req.params.email) {
-  //   const withoutQuotesEmail = req.params.email.replaceAll('"', '');
+  //   const withoutQuotesEmail = req.params.emai;
   //   const allUsers = await loginModel.find({
   //     gmail: { $ne: withoutQuotesEmail },
   //   });
@@ -114,7 +115,7 @@ const isLogin = async (req, res) => {
 // adding follower
 const addFollower = async (req, res) => {
   try{
-    const withoutQuotesEmail = req?.body?.authEmail?.replaceAll('"', '');
+    const withoutQuotesEmail = req?.body?.authEmail;
     const followed = await loginModel.updateOne(
       { gmail: withoutQuotesEmail },
       { $push: { Following: req.body.followID } }
@@ -134,7 +135,7 @@ res.json(err)
 };
 const getFollowing = async (req, res) => {
   try{
-    const withoutQuotesEmail = req?.params?.email?.replaceAll('"', '');
+    const withoutQuotesEmail = req?.params?.email;
     // console.log(withoutQuotesEmail);
   
     const allUsers = await loginModel.find({
@@ -152,7 +153,7 @@ res.json(err)
 };
 const showIfNotFollowed = async (req, res) => {
   try{
-    const withoutQuotesEmail = req?.params?.email?.replaceAll('"', '');
+    const withoutQuotesEmail = req?.params?.email;
 
     const { Following } = await loginModel.findOne({
       gmail: withoutQuotesEmail,

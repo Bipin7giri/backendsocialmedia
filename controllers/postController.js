@@ -82,55 +82,21 @@ const addPost = async (req, res) => {
 
 // add Comment to post
 const addComment = async (req, res) => {
-  const withoutQuotesEmail = req.body.email.replaceAll('"', '');
-  const data = await postModel.findByIdAndUpdate(
-    {
-      _id: req.body.id,
-    },
-    {
-      $push: {
-        comments: { email: withoutQuotesEmail, comment: req.body.comment },
-      },
-    }
-  );
-
-  const notification = await NotificationModel.create({
-    content: `${withoutQuotesEmail} has commented: ${req.body.comment} `,
-    post: data._id,
-  });
-  const notificationID = await PostModel.findByIdAndUpdate(
-    { _id: data._id },
-    {
-      $push: { notification: notification },
-    }
-  );
-  if (notification) {
-    res.json({
-      message: 'notification saved',
-    });
-  }
-};
-
-const addLike = async (req, res) => {
-  const withoutQuotesEmail = req.body.email?.replaceAll('"', '');
-  const { likes, _id } = await postModel.findById({ _id: req.body.id });
-  const check = likes.filter((item) => {
-    if (item.email === withoutQuotesEmail) {
-      return item;
-    }
-  });
-
-  if (check.length === 0) {
+  try{
+    const withoutQuotesEmail = req.body.email.replaceAll('"', '');
     const data = await postModel.findByIdAndUpdate(
-      { _id: req.body.id, 'likes.email': withoutQuotesEmail },
+      {
+        _id: req.body.id,
+      },
       {
         $push: {
-          likes: { email: withoutQuotesEmail, like: true },
+          comments: { email: withoutQuotesEmail, comment: req.body.comment },
         },
       }
     );
+  
     const notification = await NotificationModel.create({
-      content: `${withoutQuotesEmail} has liked your post `,
+      content: `${withoutQuotesEmail} has commented: ${req.body.comment} `,
       post: data._id,
     });
     const notificationID = await PostModel.findByIdAndUpdate(
@@ -139,25 +105,71 @@ const addLike = async (req, res) => {
         $push: { notification: notification },
       }
     );
-    if (data) {
+    if (notification) {
       res.json({
-        status: true,
-        // postId: req.body.id,
-      });
-    }
-  } else {
-    const data = await postModel.updateOne(
-      { _id: req.body.id, 'likes.email': withoutQuotesEmail },
-      { $pull: { likes: { email: withoutQuotesEmail, like: true } } },
-      { multi: true }
-    );
-    if (data) {
-      res.json({
-        status: true,
-        // postId: req.body.id,
+        message: 'notification saved',
       });
     }
   }
+  catch(err){
+   res.json(err)
+  }
+ 
+};
+
+const addLike = async (req, res) => {
+  try{
+    const withoutQuotesEmail = req.body.email?.replaceAll('"', '');
+    const { likes, _id } = await postModel.findById({ _id: req.body.id });
+    const check = likes.filter((item) => {
+      if (item.email === withoutQuotesEmail) {
+        return item;
+      }
+    });
+  
+    if (check.length === 0) {
+      const data = await postModel.findByIdAndUpdate(
+        { _id: req.body.id, 'likes.email': withoutQuotesEmail },
+        {
+          $push: {
+            likes: { email: withoutQuotesEmail, like: true },
+          },
+        }
+      );
+      const notification = await NotificationModel.create({
+        content: `${withoutQuotesEmail} has liked your post `,
+        post: data._id,
+      });
+      const notificationID = await PostModel.findByIdAndUpdate(
+        { _id: data._id },
+        {
+          $push: { notification: notification },
+        }
+      );
+      if (data) {
+        res.json({
+          status: true,
+          // postId: req.body.id,
+        });
+      }
+    } else {
+      const data = await postModel.updateOne(
+        { _id: req.body.id, 'likes.email': withoutQuotesEmail },
+        { $pull: { likes: { email: withoutQuotesEmail, like: true } } },
+        { multi: true }
+      );
+      if (data) {
+        res.json({
+          status: true,
+          // postId: req.body.id,
+        });
+      }
+    }
+  }
+  catch(err){
+res.json(err)
+  }
+  
 
   // const notification = await NotificationModel.create({
   //   content: `${withoutQuotesEmail} has liked your post`,
